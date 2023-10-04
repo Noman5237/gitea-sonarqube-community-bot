@@ -8,7 +8,7 @@ const opened = async (req) => {
     console.log('Pull request is opened!')
 
     const repository = req.body.pull_request.base.repo.full_name;
-    const pullRequestId = req.body.pull_request.id;
+    const pullRequestId = req.body.pull_request.number;
 
     console.log(`Repository: ${repository}`)
     console.log(`Pull request id: ${pullRequestId}`)
