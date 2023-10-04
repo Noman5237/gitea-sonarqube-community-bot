@@ -8,9 +8,6 @@ const sonarqubeClient = axios.create({
     auth: {
         username: GLOBALS.SONARQUBE_TOKEN,
     },
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-    },
     maxBodyLength: Infinity
 });
 
@@ -23,9 +20,20 @@ const createProject = async ({name, mainBranch}) => {
         newCodeDefinitionValue: 'REFERENCE_BRANCH',
     });
 
-    await sonarqubeClient.post('/projects/create', data);
+    await sonarqubeClient.post('/projects/create', data, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+    });
+}
+
+const getQualityGateStatus = async ({projectKey}) => {
+    const res = await sonarqubeClient.get(`/qualitygates/project_status?projectKey=${projectKey}`)
+    console.log(`project: ${projectKey} status: ${res.data.projectStatus.status}`)
+    return res.data.projectStatus
 }
 
 export const sonarqubeApi = {
-    createProject
+    createProject,
+    getQualityGateStatus
 }

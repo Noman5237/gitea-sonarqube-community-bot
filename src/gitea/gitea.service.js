@@ -2,7 +2,7 @@ import {pullRequestActions} from "./events/pull-request.actions";
 import {giteaApi} from "./gitea.api";
 
 const events = {
-    'pull_request': pullRequestActions
+    'pull_request': pullRequestActions,
 }
 
 const processHookCallback = async (req) => {
@@ -25,7 +25,13 @@ const addCommentToIssue = async ({repository, index, comment}) => {
     await giteaApi.postComment({repository, index, comment})
 }
 
+const addStatusToCommit = async ({repository, sha, state, description, context, target_url = ''}) => {
+    console.log(`Adding status to commit ${sha}...`)
+    await giteaApi.updateStatus({repository, sha, state, description, context, target_url})
+}
+
 export const giteaService = {
     processHookCallback,
-    addCommentToIssue
+    addCommentToIssue,
+    addStatusToCommit
 }

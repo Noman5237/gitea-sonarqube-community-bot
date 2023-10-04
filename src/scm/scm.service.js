@@ -21,13 +21,6 @@ const cloneRepo = async (repo, ref) => {
         ref: ref,
         singleBranch: true,
         depth: 1,
-        onProgress: (event) => {
-            // when cloning is completed, resolve the promise
-            console.log(event)
-            if (event.loaded / event.total >= 1) {
-                console.log(`Cloned ${repo}! event`)
-            }
-        }
     });
     console.log(`Cloned ${repo}!`)
 }
@@ -40,13 +33,6 @@ const fetchRepo = async (repo, ref) => {
         dir: path.join('./repos', dir),
         remoteRef: ref,
         singleBranch: true,
-        onProgress: (event) => {
-            // when cloning is completed, resolve the promise
-            console.log(event)
-            if (event.loaded / event.total >= 1) {
-                console.log(`Pulled ${repo}! event`)
-            }
-        }
     });
     console.log(`Pulled ${repo}!`)
 }
@@ -65,13 +51,6 @@ const pullBranch = async (repo, ref) => {
             name: 'gitea-sq-bot',
             email: 'gitea-sq-bot.fintech@brainstation-23.com'
         },
-        onProgress: (event) => {
-            // when cloning is completed, resolve the promise
-            console.log(event)
-            if (event.loaded / event.total >= 1) {
-                console.log(`Pulled ${repo}! event`)
-            }
-        }
     });
     console.log(`Pulled ${repo}!`)
 }
@@ -85,13 +64,6 @@ const checkoutBranch = async (repo, ref) => {
         http,
         dir: path.join('./repos', dir),
         ref,
-        onProgress: (event) => {
-            // when cloning is completed, resolve the promise
-            console.log(event)
-            if (event.loaded / event.total >= 1) {
-                console.log(`Checkout ${repo}! event`)
-            }
-        }
     });
     console.log(`checkout ${repo}!`)
 }

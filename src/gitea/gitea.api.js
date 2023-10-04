@@ -24,6 +24,25 @@ const postComment = async ({repository, index, comment}) => {
     }
 }
 
+const updateStatus = async ({repository, sha, state, description, context, target_url = ''}) => {
+    const owner = repository.owner.login
+    const repo = repository.name
+    const url = `/repos/${owner}/${repo}/statuses/${sha}`
+    const body = {
+        state,
+        description,
+        context,
+        target_url
+    }
+
+    const res = await giteaClient.post(url, body)
+    console.log(res)
+    if (res.status !== 201) {
+        throw new Error(`Error while updating status of commit ${sha}`)
+    }
+}
+
 export const giteaApi = {
-    postComment
+    postComment,
+    updateStatus
 }

@@ -8,11 +8,15 @@ export const createSonarqubeReport = async (req) => {
     const repository = req.body.pull_request.base.repo;
     const pullRequestId = req.body.pull_request.number;
 
-    await giteaService.addCommentToIssue({
+    // add status to commit
+    await giteaService.addStatusToCommit({
         repository,
-        index: pullRequestId,
-        comment: 'Sonarqube report is being created...'
+        sha: req.body.pull_request.head.sha,
+        state: 'pending',
+        description: 'Sonarqube report is being created...',
+        context: 'Sonarqube'
     })
+
     await sonarqubeService.createProject(req)
     await scmServices.cloneRepo(repository, req.body.pull_request.base.ref)
     await scmServices.checkoutBranch(repository, req.body.pull_request.base.ref)
@@ -25,9 +29,23 @@ export const createSonarqubeReport = async (req) => {
     sonarqubeService.runAnalysis(repository, pullRequestId, req.body.pull_request.head.sha.substring(0, 7))
 
     const projectKey = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
+
+    const report = await sonarqubeService.generateReportSummary(repository, pullRequestId)
+
+    // add status to commit
+    await giteaService.addStatusToCommit({
+        repository,
+        sha: req.body.pull_request.head.sha,
+        state: report.status,
+        description: `Sonarqube report is created!`,
+        context: 'Sonarqube',
+        target_url: `${GLOBALS.SONARQUBE_URL}/dashboard?id=${projectKey}`
+    })
+
     await giteaService.addCommentToIssue({
         repository,
         index: pullRequestId,
-        comment: `Sonarqube report is created!<br>Check it out: ${GLOBALS.SONARQUBE_URL}/dashboard?id=${projectKey}`
+        comment: report.comment
     })
+
 }

@@ -20,5 +20,6 @@ const opened = async (req) => {
 }
 
 export const pullRequestActions = {
-    opened
+    opened,
+    synchronized: opened
 }
