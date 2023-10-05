@@ -5,18 +5,23 @@ const events = {
     'pull_request': pullRequestActions,
 }
 
-const processHookCallback = async (req) => {
+const processHookCallback = (req) => {
     console.log('Processing hook callback...')
     const event = req.headers['x-github-event']
     const action = req.body.action
-    const eventObj = events[event]
-    if (eventObj === undefined) {
+
+    const eventActions = events[event]
+    if (eventActions === undefined) {
         return;
     }
 
-    const actionFunc = eventObj[action]
-    if (actionFunc !== undefined) {
-        return await actionFunc(req)
+    const actionTriggers = eventActions[action]
+    if (actionTriggers === undefined) {
+        return
+    }
+
+    for (const trigger of actionTriggers) {
+        trigger(req)
     }
 }
 

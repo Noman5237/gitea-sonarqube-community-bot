@@ -27,6 +27,10 @@ const createProject = async ({name, mainBranch}) => {
     });
 }
 
+const deleteProject = async ({projectKey}) => {
+    await sonarqubeClient.post(`/projects/delete?project=${projectKey}`);
+}
+
 const getQualityGateStatus = async ({projectKey}) => {
     const res = await sonarqubeClient.get(`/qualitygates/project_status?projectKey=${projectKey}`)
     console.log(`project: ${projectKey} status: ${res.data.projectStatus.status}`)
@@ -35,5 +39,6 @@ const getQualityGateStatus = async ({projectKey}) => {
 
 export const sonarqubeApi = {
     createProject,
+    deleteProject,
     getQualityGateStatus
 }

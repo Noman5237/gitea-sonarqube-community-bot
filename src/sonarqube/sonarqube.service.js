@@ -36,6 +36,18 @@ const createProject = async (req) => {
 
 }
 
+const deleteProject = async (projectKey) => {
+    console.log(`Deleting Sonarqube project... ${projectKey}`)
+    try {
+        await sonarqubeApi.deleteProject({projectKey})
+        console.log('Sonarqube project deleted')
+    } catch (e) {
+        const res = e.response.data
+        console.log('Error while deleting Sonarqube project')
+        console.log(res)
+    }
+}
+
 const runAnalysis = (repository, pullRequestId, version) => {
     console.log(`Running Sonarqube analysis for ${repository} pull request ${pullRequestId}...`)
     const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
@@ -118,6 +130,7 @@ const generateReportSummary = async (repository, pullRequestId) => {
 
 export const sonarqubeService = {
     createProject,
+    deleteProject,
     runAnalysis,
-    generateReportSummary
+    generateReportSummary,
 }

@@ -49,3 +49,10 @@ export const createSonarqubeReport = async (req) => {
     })
 
 }
+
+export const deleteSonarqubeProject = async (req) => {
+    const repository = req.body.repository;
+    const pullRequestId = req.body.pull_request.number;
+    const projectKey = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
+    await sonarqubeService.deleteProject(projectKey)
+}
