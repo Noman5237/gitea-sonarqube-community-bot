@@ -42,7 +42,21 @@ const updateStatus = async ({repository, sha, state, description, context, targe
     }
 }
 
+const getPullRequest = async ({repository, index}) => {
+    const owner = repository.owner.login
+    const repo = repository.name
+    const url = `/repos/${owner}/${repo}/pulls/${index}`
+
+    const res = await giteaClient.get(url)
+    console.log(res)
+    if (res.status !== 200) {
+        throw new Error(`Error while getting pull request ${index}`)
+    }
+    return res.data
+}
+
 export const giteaApi = {
     postComment,
-    updateStatus
+    updateStatus,
+    getPullRequest
 }

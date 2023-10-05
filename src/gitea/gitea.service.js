@@ -1,16 +1,27 @@
-import {pullRequestActions} from "./events/pull-request.actions";
+import {pullRequestActions, pullRequestCommentActions} from "./events/pull-request.actions";
 import {giteaApi} from "./gitea.api";
 
 const events = {
-    'pull_request': pullRequestActions,
+    pull_request: {
+        pull_request: pullRequestActions,
+    },
+    issue_comment: {
+        pull_request_comment: pullRequestCommentActions
+    },
 }
 
 const processHookCallback = (req) => {
     console.log('Processing hook callback...')
     const event = req.headers['x-github-event']
+    const type = req.headers['x-github-event-type']
     const action = req.body.action
 
-    const eventActions = events[event]
+    const eventWrapper = events[event]
+    if (event === undefined) {
+        return;
+    }
+
+    const eventActions = eventWrapper[type]
     if (eventActions === undefined) {
         return;
     }
@@ -35,8 +46,14 @@ const addStatusToCommit = async ({repository, sha, state, description, context, 
     await giteaApi.updateStatus({repository, sha, state, description, context, target_url})
 }
 
+const getPullRequest = async ({repository, index}) => {
+    console.log(`Getting pull request ${index}...`)
+    return await giteaApi.getPullRequest({repository, index})
+}
+
 export const giteaService = {
     processHookCallback,
     addCommentToIssue,
-    addStatusToCommit
+    addStatusToCommit,
+    getPullRequest
 }
