@@ -6,9 +6,9 @@ const events = {
 }
 
 const processHookCallback = async (req) => {
+    console.log('Processing hook callback...')
     const event = req.headers['x-github-event']
     const action = req.body.action
-    console.log('Processing hook callback...')
     const eventObj = events[event]
     if (eventObj === undefined) {
         return;
