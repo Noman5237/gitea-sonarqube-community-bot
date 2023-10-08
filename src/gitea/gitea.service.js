@@ -4,6 +4,7 @@ import {giteaApi} from "./gitea.api";
 const events = {
     pull_request: {
         pull_request: pullRequestActions,
+        pull_request_sync: pullRequestActions,
     },
     issue_comment: {
         pull_request_comment: pullRequestCommentActions
