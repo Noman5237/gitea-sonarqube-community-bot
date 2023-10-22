@@ -83,8 +83,7 @@ const runAnalysis = (traceId, repository, pullRequestId, version) => {
         command = `mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar -Drevision=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN} -Dmaven.test.failure.ignore=true || echo 'build failed'`
     }
 
-    log(traceId, 'Running analysis...')
-    log(traceId, `version: ${version}`)
+    log(traceId, `Running analysis on version: ${version}`)
 
     try {
         const output = execSync(command, {cwd: projectDir});
