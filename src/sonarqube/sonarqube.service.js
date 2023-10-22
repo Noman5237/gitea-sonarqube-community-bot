@@ -78,7 +78,7 @@ const runAnalysis = (repository, pullRequestId, version) => {
          *   -Dsonar.host.url=http://localhost:9000 \
          *   -Dsonar.login=squ_21603ba435c62cecf014c26195e1bd51116c9b0c
          */
-        command = `mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar -Drevision=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN}`
+        command = `mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar -Drevision=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN} -Dmaven.test.failure.ignore=true || echo 'build failed'`
     }
 
     console.log('Running analysis...')
