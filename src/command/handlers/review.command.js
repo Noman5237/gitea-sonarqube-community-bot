@@ -1,11 +1,16 @@
 import {createSonarqubeReport} from "../../sonarqube/sonarqube.triggers";
 import {giteaService} from "../../gitea/gitea.service";
+import {log} from '../../util/logger';
 
 export const review = async (req) => {
     const repository = req.body.repository;
     const pullRequestId = req.body.issue.number;
-    const pullRequestDetails = await giteaService.getPullRequest({repository, index: pullRequestId})
+
+    log(req.traceId, `creating review of repo: ${repository.full_name}, id: ${pullRequestId}`)
+
+    const pullRequestDetails = await giteaService.getPullRequest(req.traceId,{repository, index: pullRequestId})
     await createSonarqubeReport({
+        traceId: req.traceId,
         body: {
             pull_request: pullRequestDetails
         }

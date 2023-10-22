@@ -1,5 +1,6 @@
 import {pullRequestActions, pullRequestCommentActions} from "./events/pull-request.actions";
 import {giteaApi} from "./gitea.api";
+import {log} from '../util/logger';
 
 const events = {
     pull_request: {
@@ -12,10 +13,11 @@ const events = {
 }
 
 const processHookCallback = (req) => {
-    console.log('Processing hook callback...')
     const event = req.headers['x-github-event']
     const type = req.headers['x-github-event-type']
     const action = req.body.action
+
+    log(req.traceId, `Processing hook callback. Event: ${event}, Type: ${type}, Action: ${action}`)
 
     const eventWrapper = events[event]
     if (event === undefined) {
@@ -33,23 +35,24 @@ const processHookCallback = (req) => {
     }
 
     for (const trigger of actionTriggers) {
+        log(req.traceId, `triggering action: ${trigger.name}`)
         trigger(req)
     }
 }
 
-const addCommentToIssue = async ({repository, index, comment}) => {
-    console.log(`Adding comment to issue ${index}...`)
-    await giteaApi.postComment({repository, index, comment})
+const addCommentToIssue = async (traceId, {repository, index, comment}) => {
+    log(traceId, `Adding comment to issue ${index}...`)
+    await giteaApi.postComment(traceId, {repository, index, comment})
 }
 
-const addStatusToCommit = async ({repository, sha, state, description, context, target_url = ''}) => {
-    console.log(`Adding status to commit ${sha}...`)
-    await giteaApi.updateStatus({repository, sha, state, description, context, target_url})
+const addStatusToCommit = async (traceId, {repository, sha, state, description, context, target_url = ''}) => {
+    // log(`Adding status to commit ${sha}...`)
+    await giteaApi.updateStatus(traceId, {repository, sha, state, description, context, target_url})
 }
 
-const getPullRequest = async ({repository, index}) => {
-    console.log(`Getting pull request ${index}...`)
-    return await giteaApi.getPullRequest({repository, index})
+const getPullRequest = async (traceId, {repository, index}) => {
+    log(traceId, `Getting pull request ${index}...`)
+    return await giteaApi.getPullRequest(traceId, {repository, index})
 }
 
 export const giteaService = {

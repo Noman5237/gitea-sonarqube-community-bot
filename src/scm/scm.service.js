@@ -4,15 +4,16 @@ import path from "path";
 import {checkout, clone, fetch, pull} from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 
-const cloneRepo = async (repo, ref) => {
-    console.log(`Cloning ${repo}...`)
-    console.log(`Ref: ${ref}`)
+import {log} from '../util/logger'
+
+const cloneRepo = async (traceId, repo, ref) => {
+    log(traceId, `Cloning ${repo.full_name} on ref: ${ref}`)
     // if repos directory does not exist, create it
     if (!fs.existsSync('./repos')) {
         fs.mkdirSync('./repos');
     }
     const dir = repo.full_name.replace('/', '-')
-    console.log('Cloning...')
+    log(traceId, 'Cloning...')
     await clone({
         fs,
         http,
@@ -22,10 +23,10 @@ const cloneRepo = async (repo, ref) => {
         singleBranch: true,
         depth: 1,
     });
-    console.log(`Cloned ${repo}!`)
+    log(traceId, `Cloned ${repo.full_name}!`)
 }
 
-const fetchRepo = async (repo, ref) => {
+const fetchRepo = async (traceId, repo, ref) => {
     const dir = repo.full_name.replace('/', '-')
     await fetch({
         fs,
@@ -34,12 +35,11 @@ const fetchRepo = async (repo, ref) => {
         remoteRef: ref,
         singleBranch: true,
     });
-    console.log(`Pulled ${repo}!`)
+    log(traceId, `Pulled ${repo.full_name}!`)
 }
 
-const pullBranch = async (repo, ref) => {
-    console.log(`Pulling ${repo}...`)
-    console.log(`Ref: ${ref}`)
+const pullBranch = async (traceId, repo, ref) => {
+    log(traceId, `Pulling ${repo.full_name} on ref: ${ref}`)
     const dir = repo.full_name.replace('/', '-')
     await pull({
         fs,
@@ -52,12 +52,11 @@ const pullBranch = async (repo, ref) => {
             email: 'gitea-sq-bot.fintech@brainstation-23.com'
         },
     });
-    console.log(`Pulled ${repo}!`)
+    log(traceId, `Pulled ${repo.full_name}!`)
 }
 
-const checkoutBranch = async (repo, ref) => {
-    console.log(`Checkout ${repo}...`)
-    console.log(`Ref: ${ref}`)
+const checkoutBranch = async (traceId, repo, ref) => {
+    log(traceId, `Checkout ${repo.full_name} on ref: ${ref}`)
     const dir = repo.full_name.replace('/', '-')
     await checkout({
         fs,
@@ -65,7 +64,7 @@ const checkoutBranch = async (repo, ref) => {
         dir: path.join('./repos', dir),
         ref,
     });
-    console.log(`checkout ${repo}!`)
+    log(traceId, `checkout ${repo.full_name}!`)
 }
 
 export const scmServices = {

@@ -5,6 +5,7 @@ import {sonarqubeApi} from "./sonarqube.api";
 import {execSync} from 'child_process';
 import {GLOBALS} from "../globals";
 import {SONARQUBE_METRICS} from "./data/sonarqube-metrics";
+import {log} from '../util/logger'
 
 const SONARQUBE_GITEA_STATUS_MAPPER = {
     'OK': 'success',
@@ -16,7 +17,7 @@ const createProject = async (req) => {
     const repository = req.body.pull_request.base.repo.full_name;
     const pullRequestId = req.body.pull_request.number;
     const projectName = `${repository}-${pullRequestId}`
-    console.log(`Creating Sonarqube project... ${projectName}`)
+    log(req.traceId, `Creating Sonarqube project... ${projectName}`)
 
     try {
         await sonarqubeApi.createProject({
@@ -27,7 +28,7 @@ const createProject = async (req) => {
         const res = e.response
         if (res.status === 400) {
             if (res.data.errors[0].msg.includes('similar key already exists')) {
-                console.log('Project already exists')
+                log(req.traceId, 'Project already exists')
             } else {
                 throw new Error(`Error while creating Sonarqube project ${projectName}`)
             }
@@ -36,20 +37,21 @@ const createProject = async (req) => {
 
 }
 
-const deleteProject = async (projectKey) => {
-    console.log(`Deleting Sonarqube project... ${projectKey}`)
+const deleteProject = async (traceId, projectKey) => {
+    log(traceId, `Deleting Sonarqube project... ${projectKey}`)
     try {
         await sonarqubeApi.deleteProject({projectKey})
-        console.log('Sonarqube project deleted')
+        log(traceId, 'Sonarqube project deleted')
     } catch (e) {
         const res = e.response.data
-        console.log('Error while deleting Sonarqube project')
-        console.log(res)
+        log(traceId, 'Error while deleting Sonarqube project')
+        log(traceId, `delete project status: ${res.status}`)
+        throw e;
     }
 }
 
-const runAnalysis = (repository, pullRequestId, version) => {
-    console.log(`Running Sonarqube analysis for ${repository} pull request ${pullRequestId}...`)
+const runAnalysis = (traceId, repository, pullRequestId, version) => {
+    log(traceId, `Running Sonarqube analysis for ${repository.full_name} pull request ${pullRequestId}...`)
     const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
     const projectDir = path.join(process.cwd(), './repos', `${repository.full_name.replace('/', '-')}`)
 
@@ -59,7 +61,7 @@ const runAnalysis = (repository, pullRequestId, version) => {
 
     let command = ''
     if (!fs.existsSync(gradleFile) && !fs.existsSync(pomFile)) {
-        console.log('Project is not gradle or maven')
+        log(traceId, 'Project is not gradle or maven')
         return
     } else if (fs.existsSync(gradleFile)) {
         /**
@@ -81,22 +83,22 @@ const runAnalysis = (repository, pullRequestId, version) => {
         command = `mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar -Drevision=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN} -Dmaven.test.failure.ignore=true || echo 'build failed'`
     }
 
-    console.log('Running analysis...')
-    console.log(`version: ${version}`)
+    log(traceId, 'Running analysis...')
+    log(traceId, `version: ${version}`)
 
     try {
         const output = execSync(command, {cwd: projectDir});
-        console.log(output.toString())
+        log(traceId, output.toString().replaceAll('\n', '\n\t'))
     } catch (e) {
-        console.log(e)
+        log(traceId, e)
     }
 }
 
-const generateReportSummary = async (repository, pullRequestId) => {
+const generateReportSummary = async (traceId, repository, pullRequestId) => {
     const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
     // wait for 3 seconds
     await new Promise(resolve => setTimeout(resolve, 3000));
-    const report = await sonarqubeApi.getQualityGateStatus({projectKey: projectId})
+    const report = await sonarqubeApi.getQualityGateStatus(traceId, {projectKey: projectId})
     const status = SONARQUBE_GITEA_STATUS_MAPPER[report.status] ?? 'failure';
 
     let htmlCode = "";

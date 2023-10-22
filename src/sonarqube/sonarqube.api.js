@@ -2,6 +2,7 @@ import axios from "axios";
 import qs from "qs";
 
 import {GLOBALS} from "../globals";
+import {log} from '../util/logger'
 
 const sonarqubeClient = axios.create({
     baseURL: 'http://localhost:9000/api',
@@ -31,9 +32,9 @@ const deleteProject = async ({projectKey}) => {
     await sonarqubeClient.post(`/projects/delete?project=${projectKey}`);
 }
 
-const getQualityGateStatus = async ({projectKey}) => {
+const getQualityGateStatus = async (traceId, {projectKey}) => {
     const res = await sonarqubeClient.get(`/qualitygates/project_status?projectKey=${projectKey}`)
-    console.log(`project: ${projectKey} status: ${res.data.projectStatus.status}`)
+    log(traceId, `project: ${projectKey} status: ${res.data.projectStatus.status}`)
     return res.data.projectStatus
 }
 
