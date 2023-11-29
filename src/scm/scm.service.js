@@ -64,7 +64,9 @@ const pullBranch = async (traceId, repo, ref) => {
         onAuth: () => ({
             username: GLOBALS.GITEA_TOKEN,
             password: GLOBALS.GITEA_TOKEN,
-        })
+        }), onAuthFailure: () => {
+            log(traceId, 'auth failed')
+        }
     });
     log(traceId, `Pulled ${repo.full_name}!`)
 }
