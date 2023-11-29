@@ -5,6 +5,7 @@ import {checkout, clone, fetch, pull} from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 
 import {log} from '../util/logger'
+import {GLOBALS} from "../globals";
 
 const cloneRepo = async (traceId, repo, ref) => {
     log(traceId, `Cloning ${repo.full_name} on ref: ${ref}`)
@@ -39,6 +40,10 @@ const fetchRepo = async (traceId, repo, ref) => {
         dir: path.join('./repos', dir),
         remoteRef: ref,
         singleBranch: true,
+        onAuth: () => ({
+            username: GLOBALS.GITEA_TOKEN,
+            password: GLOBALS.GITEA_TOKEN,
+        })
     });
     log(traceId, `Pulled ${repo.full_name}!`)
 }
@@ -56,6 +61,10 @@ const pullBranch = async (traceId, repo, ref) => {
             name: 'gitea-sq-bot',
             email: 'gitea-sq-bot.fintech@brainstation-23.com'
         },
+        onAuth: () => ({
+            username: GLOBALS.GITEA_TOKEN,
+            password: GLOBALS.GITEA_TOKEN,
+        })
     });
     log(traceId, `Pulled ${repo.full_name}!`)
 }
@@ -68,6 +77,10 @@ const checkoutBranch = async (traceId, repo, ref) => {
         http,
         dir: path.join('./repos', dir),
         ref,
+        onAuth: () => ({
+            username: GLOBALS.GITEA_TOKEN,
+            password: GLOBALS.GITEA_TOKEN,
+        })
     });
     log(traceId, `checkout ${repo.full_name}!`)
 }
