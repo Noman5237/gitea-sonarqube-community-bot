@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import {sonarqubeApi} from "./sonarqube.api";
-import {execSync} from 'child_process';
+import {execSync, exec} from 'child_process';
 import {GLOBALS} from "../globals";
 import {SONARQUBE_METRICS} from "./data/sonarqube-metrics";
 import {log} from '../util/logger'
@@ -51,7 +51,7 @@ const deleteProject = async (traceId, projectKey) => {
     }
 }
 
-const runAnalysis = (traceId, repository, pullRequestId, version) => {
+const runAnalysis = async (traceId, repository, pullRequestId, version) => {
     log(traceId, `Running Sonarqube analysis for ${repository.full_name} pull request ${pullRequestId}...`)
     const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
     const projectDir = path.join(process.cwd(), './repos', `${repository.full_name.replace('/', '-')}`)
@@ -87,8 +87,12 @@ const runAnalysis = (traceId, repository, pullRequestId, version) => {
     log(traceId, `Running analysis on version: ${version}`)
 
     try {
-        const output = execSync(command, {cwd: projectDir});
-        log(traceId, output.toString().replaceAll('\n', '\n\t'))
+        // const output = execSync(command, {cwd: projectDir});
+        // const output = await new Promise((resolve, reject) => exec(command, {cwd: projectDir}, () => resolve()));
+        const output = await exec(command, {cwd: projectDir});
+        output.stdout.on('data', (data) => {
+            log(traceId, data.toString().replaceAll('\n', '\n\t'));
+        });
     } catch (e) {
         log(traceId, e)
     }

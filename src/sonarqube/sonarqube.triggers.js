@@ -24,13 +24,12 @@ export const createSonarqubeReport = async (req) => {
         await scmServices.cloneRepo(req.traceId, repository, req.body.pull_request.base.ref)
         await scmServices.checkoutBranch(req.traceId, repository, req.body.pull_request.base.ref)
         await scmServices.pullBranch(req.traceId, repository, req.body.pull_request.base.ref)
-        sonarqubeService.runAnalysis(req.traceId, repository, pullRequestId, req.body.pull_request.base.sha.substring(0, 7))
+        await sonarqubeService.runAnalysis(req.traceId, repository, pullRequestId, req.body.pull_request.base.sha.substring(0, 7))
 
         await scmServices.fetchRepo(req.traceId, repository, req.body.pull_request.head.ref)
         await scmServices.checkoutBranch(req.traceId, repository, req.body.pull_request.head.ref)
         await scmServices.pullBranch(req.traceId, repository, req.body.pull_request.head.ref)
-        sonarqubeService.runAnalysis(req.traceId, repository, pullRequestId, req.body.pull_request.head.sha.substring(0, 7))
-
+        await sonarqubeService.runAnalysis(req.traceId, repository, pullRequestId, req.body.pull_request.head.sha.substring(0, 7))
 
         const report = await sonarqubeService.generateReportSummary(req.traceId, repository, pullRequestId)
 
