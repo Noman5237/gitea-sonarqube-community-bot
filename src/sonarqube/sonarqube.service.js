@@ -24,6 +24,7 @@ const createProject = async (req) => {
             name: projectName,
             mainBranch: req.body.pull_request.base.ref
         })
+        log(req.traceId, 'Sonarqube project created')
     } catch (e) {
         const res = e.response
         if (res.status === 400) {

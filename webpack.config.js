@@ -20,7 +20,7 @@ module.exports = {
         }],
     },
     target: 'node',
-    watch: true,
+    watch: false,
     watchOptions: {
         ignored: /node_modules/,
         aggregateTimeout: 500,

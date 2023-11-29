@@ -5,12 +5,12 @@ import {GLOBALS} from "../globals";
 import {log} from '../util/logger';
 
 export const createSonarqubeReport = async (req) => {
+    const repository = req.body.pull_request.base.repo;
+    const pullRequestId = req.body.pull_request.number;
+    const projectKey = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
+    log(req.traceId, `Creating Sonarqube report ${projectKey}`)
+
     try {
-
-        const repository = req.body.pull_request.base.repo;
-        const pullRequestId = req.body.pull_request.number;
-        log(req.traceId, `Creating Sonarqube report of repo: ${repository.full_name}, id: ${pullRequestId}`)
-
         // add status to commit
         await giteaService.addStatusToCommit(req.traceId, {
             repository,
@@ -31,7 +31,6 @@ export const createSonarqubeReport = async (req) => {
         await scmServices.pullBranch(req.traceId, repository, req.body.pull_request.head.ref)
         sonarqubeService.runAnalysis(req.traceId, repository, pullRequestId, req.body.pull_request.head.sha.substring(0, 7))
 
-        const projectKey = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
 
         const report = await sonarqubeService.generateReportSummary(req.traceId, repository, pullRequestId)
 
@@ -52,7 +51,16 @@ export const createSonarqubeReport = async (req) => {
         })
     } catch (e) {
         log(req.traceId, e.message);
-        throw e;
+        // add status to commit
+        await giteaService.addStatusToCommit(req.traceId, {
+            repository,
+            sha: req.body.pull_request.head.sha,
+            state: 'failure',
+            description: `Internal Service Exception! trace: ${req.traceId}`,
+            context: 'Sonarqube',
+            target_url: `${GLOBALS.SONARQUBE_URL}/dashboard?id=${projectKey}`
+        })
+        throw 'failed to create sonarqube report'
     }
 }
 

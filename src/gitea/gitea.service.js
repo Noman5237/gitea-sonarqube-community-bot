@@ -34,9 +34,13 @@ const processHookCallback = (req) => {
         return
     }
 
-    for (const trigger of actionTriggers) {
-        log(req.traceId, `triggering action: ${trigger.name}`)
-        trigger(req)
+    try {
+        for (const trigger of actionTriggers) {
+            log(req.traceId, `triggering action: ${trigger.name}`)
+            trigger(req)
+        }
+    } catch (e) {
+        log(req.traceId, e.message)
     }
 }
 

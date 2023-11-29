@@ -5,7 +5,7 @@ import {GLOBALS} from "../globals";
 import {log} from '../util/logger'
 
 const sonarqubeClient = axios.create({
-    baseURL: 'http://localhost:9000/api',
+    baseURL: `${GLOBALS.SONARQUBE_URL}/api`,
     auth: {
         username: GLOBALS.SONARQUBE_TOKEN,
     },

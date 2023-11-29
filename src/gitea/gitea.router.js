@@ -5,7 +5,7 @@ import {log} from '../util/logger';
 export const giteaRouter = Router()
 
 giteaRouter.post('/hooks', (req, res) => {
-    const receivedMessage = 'Gitea hook callback is receivedMessage!';
+    const receivedMessage = 'Gitea hook callback is received!';
     log(req.traceId, receivedMessage)
     giteaService.processHookCallback(req)
     res.send(receivedMessage)

@@ -9,10 +9,14 @@ export const review = async (req) => {
     log(req.traceId, `creating review of repo: ${repository.full_name}, id: ${pullRequestId}`)
 
     const pullRequestDetails = await giteaService.getPullRequest(req.traceId,{repository, index: pullRequestId})
-    await createSonarqubeReport({
-        traceId: req.traceId,
-        body: {
-            pull_request: pullRequestDetails
-        }
-    })
+    try {
+        await createSonarqubeReport({
+            traceId: req.traceId,
+            body: {
+                pull_request: pullRequestDetails
+            }
+        })
+    } catch (e) {
+        log(req.traceId, e.message);
+    }
 }

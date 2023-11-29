@@ -8,6 +8,7 @@ import {log} from '../util/logger'
 
 const cloneRepo = async (traceId, repo, ref) => {
     log(traceId, `Cloning ${repo.full_name} on ref: ${ref}`)
+    log(traceId, `Cloning ${repo.clone_url}`)
     // if repos directory does not exist, create it
     if (!fs.existsSync('./repos')) {
         fs.mkdirSync('./repos');
@@ -22,6 +23,10 @@ const cloneRepo = async (traceId, repo, ref) => {
         ref: ref,
         singleBranch: true,
         depth: 1,
+        onAuth: () => ({
+            username: GLOBALS.GITEA_TOKEN,
+            password: GLOBALS.GITEA_TOKEN,
+        })
     });
     log(traceId, `Cloned ${repo.full_name}!`)
 }

@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --watch",
+    "build-prod": "webpack --mode production",
     "serve": "nodemon ./dist/app.js --ignore ./repos"
   },
   "keywords": [],
