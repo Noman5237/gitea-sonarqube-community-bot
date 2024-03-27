@@ -7,6 +7,7 @@ RUN apt -y upgrade
 RUN apt -y install gnupg2 curl wget
 RUN apt -y install openjdk-17-jdk
 RUN apt -y install maven
+RUN apt install -y git vim
 
 COPY . /app
 WORKDIR /app
@@ -19,5 +20,6 @@ RUN npm run build-prod
 
 VOLUME /app/traces
 VOLUME /app/repos
+VOLUME /root/.m2
 
 ENTRYPOINT ["node", "./dist/app.js"]

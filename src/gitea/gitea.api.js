@@ -37,7 +37,7 @@ const updateStatus = async (traceId, {repository, sha, state, description, conte
     }
 
     const res = await giteaClient.post(url, body)
-    log(traceId, `gitea client update status to ${state}: ${res.status}`)
+    log(traceId, ` ${state}: ${res.status}`)
     if (res.status !== 201) {
         throw new Error(`Error while updating status of commit ${sha}`)
     }

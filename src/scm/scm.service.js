@@ -14,7 +14,8 @@ const cloneRepo = async (traceId, repo, ref) => {
     if (!fs.existsSync('./repos')) {
         fs.mkdirSync('./repos');
     }
-    const dir = repo.full_name.replace('/', '-')
+    // const dir = repo.full_name.replace('/', '-')
+    const dir = repo.projectKey
     log(traceId, 'Cloning...')
     await clone({
         fs,
@@ -33,7 +34,8 @@ const cloneRepo = async (traceId, repo, ref) => {
 }
 
 const fetchRepo = async (traceId, repo, ref) => {
-    const dir = repo.full_name.replace('/', '-')
+    // const dir = repo.full_name.replace('/', '-')
+    const dir = repo.projectKey
     await fetch({
         fs,
         http,
@@ -50,7 +52,8 @@ const fetchRepo = async (traceId, repo, ref) => {
 
 const pullBranch = async (traceId, repo, ref) => {
     log(traceId, `Pulling ${repo.full_name} on ref: ${ref}`)
-    const dir = repo.full_name.replace('/', '-')
+    // const dir = repo.full_name.replace('/', '-')
+    const dir = repo.projectKey
     await pull({
         fs,
         http,
@@ -73,7 +76,8 @@ const pullBranch = async (traceId, repo, ref) => {
 
 const checkoutBranch = async (traceId, repo, ref) => {
     log(traceId, `Checkout ${repo.full_name} on ref: ${ref}`)
-    const dir = repo.full_name.replace('/', '-')
+    // const dir = repo.full_name.replace('/', '-')
+    const dir = repo.projectKey
     await checkout({
         fs,
         http,
@@ -87,9 +91,20 @@ const checkoutBranch = async (traceId, repo, ref) => {
     log(traceId, `checkout ${repo.full_name}!`)
 }
 
+const deleteRepo = async (traceId, repo) => {
+    const dir = repo.projectKey
+    const repoPath = path.join('./repos', dir)
+    if (fs.existsSync(repoPath)) {
+        fs.rmdirSync(repoPath, {recursive: true})
+        log(traceId, `Deleted ${repo.full_name}!`)
+    }
+    log(traceId, `Deleted ${repo.full_name}!`)
+}
+
 export const scmServices = {
     cloneRepo,
     pullBranch,
     checkoutBranch,
-    fetchRepo
+    fetchRepo,
+    deleteRepo,
 }

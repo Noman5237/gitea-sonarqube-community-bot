@@ -63,5 +63,5 @@ export const giteaService = {
     processHookCallback,
     addCommentToIssue,
     addStatusToCommit,
-    getPullRequest
+    getPullRequest,
 }
