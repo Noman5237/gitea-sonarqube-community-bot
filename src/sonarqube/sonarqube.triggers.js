@@ -50,7 +50,7 @@ export const createSonarqubeReport = async (req) => {
       comment: report.comment
     })
 
-    await scmServices.deleteRepo(req.traceId, projectKey)
+    await scmServices.deleteRepo(req.traceId, repository)
 
   } catch (e) {
     log(req.traceId, e.message);
@@ -73,6 +73,6 @@ export const deleteSonarqubeProject = async (req) => {
   const projectKey = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
   repository.projectKey = projectKey
   log(req.traceId, `deleting sonarqube project ${projectKey}`)
-  await scmServices.deleteRepo(req.traceId, projectKey)
+  await scmServices.deleteRepo(req.traceId, repository)
   await sonarqubeService.deleteProject(req.traceId, projectKey)
 }

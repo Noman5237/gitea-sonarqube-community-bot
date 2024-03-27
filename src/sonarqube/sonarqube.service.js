@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 
 import {sonarqubeApi} from "./sonarqube.api";
-import {execSync, exec} from 'child_process';
+import {execSync, exec, spawn} from 'child_process';
 import {GLOBALS} from "../globals";
 import {SONARQUBE_METRICS} from "./data/sonarqube-metrics";
 import {log} from '../util/logger'
@@ -59,26 +59,34 @@ const runAnalysis = async (traceId, repository, pullRequestId, version) => {
   const projectDir = repository.projectKey
 
   // detect project and get command
-  getCommand(projectDir, {
+  const strategy = getCommand(projectDir, {
     version,
     projectId,
     host: GLOBALS.SONARQUBE_URL,
     token: GLOBALS.SONARQUBE_TOKEN
   })
 
-  log(traceId, `Running analysis on version: ${version}`)
+  log(traceId, `Running analysis on version: ${version} with ${strategy}`)
 
   try {
     // const output = execSync(command, {cwd: projectDir});
     // const output = await new Promise((resolve, reject) => exec(command, {cwd: projectDir}, () => resolve()));
-    const output = exec(command, {cwd: projectDir});
+    const command = strategy.split(' ')[0]
+    const args = strategy.split(' ').slice(1)
+    const output = spawn(command, args, {cwd: path.join("./repos", projectDir)});
     output.stdout.on('data', (data) => {
+      log(traceId, data.toString().replaceAll('\n', '\n\t'));
+    });
+    output.stderr.on('data', (data) => {
+      log(traceId, data.toString().replaceAll('\n', '\n\t'));
+    });
+    output.on('error', (data) => {
       log(traceId, data.toString().replaceAll('\n', '\n\t'));
     });
     // wait for child process to end
     await new Promise((resolve, reject) => {
       try {
-        output.on('exit', () => resolve())
+        output.on('close', () => resolve())
       } catch (e) {
         reject(e);
       }
