@@ -6,6 +6,7 @@ import {execSync, exec} from 'child_process';
 import {GLOBALS} from "../globals";
 import {SONARQUBE_METRICS} from "./data/sonarqube-metrics";
 import {log} from '../util/logger'
+import {getCommand} from "./sonarqube.strategy";
 
 const SONARQUBE_GITEA_STATUS_MAPPER = {
   'OK': 'success',
@@ -57,33 +58,13 @@ const runAnalysis = async (traceId, repository, pullRequestId, version) => {
   // const projectDir = path.join(process.cwd(), './repos', `${repository.full_name.replace('/', '-')}`)
   const projectDir = repository.projectKey
 
-  // detect project is gradle or maven
-  const gradleFile = path.join(projectDir, 'build.gradle')
-  const pomFile = path.join(projectDir, 'pom.xml')
-
-  let command = ''
-  if (!fs.existsSync(gradleFile) && !fs.existsSync(pomFile)) {
-    log(traceId, 'Project is not gradle or maven')
-    return
-  } else if (fs.existsSync(gradleFile)) {
-    /**
-     * ./gradlew sonar \
-     *   -Pversion=1.0.0 \
-     *   -Dsonar.projectKey=gitea-sq-org_gitea-sq-test-repo-41 \
-     *   -Dsonar.host.url=http://localhost:9000 \
-     *   -Dsonar.login=squ_21603ba435c62cecf014c26195e1bd51116c9b0c
-     */
-    command = `./gradlew clean sonar -Pversion=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN}`
-  } else if (fs.existsSync(pomFile)) {
-    /**
-     * mvn clean verify sonar:sonar \
-     *   -Drevision=1.0.0 \
-     *   -Dsonar.projectKey=gitea-sq-org_gitea-sq-test-repo-72 \
-     *   -Dsonar.host.url=http://localhost:9000 \
-     *   -Dsonar.login=squ_21603ba435c62cecf014c26195e1bd51116c9b0c
-     */
-    command = `mvn clean verify org.sonarsource.scanner.maven:sonar-maven-plugin:3.10.0.2594:sonar -Drevision=${version} -Dsonar.projectKey=${projectId} -Dsonar.host.url=${GLOBALS.SONARQUBE_URL} -Dsonar.login=${GLOBALS.SONARQUBE_TOKEN} -Dmaven.test.failure.ignore=true || echo 'build failed'`
-  }
+  // detect project and get command
+  getCommand(projectDir, {
+    version,
+    projectId,
+    host: GLOBALS.SONARQUBE_URL,
+    token: GLOBALS.SONARQUBE_TOKEN
+  })
 
   log(traceId, `Running analysis on version: ${version}`)
 
