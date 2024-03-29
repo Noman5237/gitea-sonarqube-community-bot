@@ -1,8 +1,13 @@
 import {pullRequestActions, pullRequestCommentActions} from "./events/pull-request.actions";
+import {pushActions} from "./events/push.actions";
+
 import {giteaApi} from "./gitea.api";
 import {log} from '../util/logger';
 
 const events = {
+    push: {
+        push: pushActions,
+    },
     pull_request: {
         pull_request: pullRequestActions,
         pull_request_sync: pullRequestActions,
@@ -15,7 +20,7 @@ const events = {
 const processHookCallback = (req) => {
     const event = req.headers['x-github-event']
     const type = req.headers['x-github-event-type']
-    const action = req.body.action
+    const action = req.body.action ?? type
 
     log(req.traceId, `Processing hook callback. Event: ${event}, Type: ${type}, Action: ${action}`)
 

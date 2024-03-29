@@ -52,11 +52,10 @@ const deleteProject = async (traceId, projectKey) => {
   }
 }
 
-const runAnalysis = async (traceId, repository, pullRequestId, version) => {
-  log(traceId, `Running Sonarqube analysis for ${repository.full_name} pull request ${pullRequestId}...`)
-  const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
-  // const projectDir = path.join(process.cwd(), './repos', `${repository.full_name.replace('/', '-')}`)
+const runAnalysis = async (traceId, repository, ref, version) => {
+  log(traceId, `Running Sonarqube analysis for ${repository.full_name} on ${ref}...`)
   const projectDir = repository.projectKey
+  const projectId = repository.projectKey
 
   // detect project and get command
   const strategy = getCommand(projectDir, {
@@ -96,8 +95,8 @@ const runAnalysis = async (traceId, repository, pullRequestId, version) => {
   }
 }
 
-const generateReportSummary = async (traceId, repository, pullRequestId) => {
-  const projectId = `${repository.full_name}-${pullRequestId}`.replace('/', '_')
+const generateReportSummary = async (traceId, repository, ref) => {
+  const projectId = repository.projectKey
   // wait for 3 seconds
   await new Promise(resolve => setTimeout(resolve, 3000));
   const report = await sonarqubeApi.getQualityGateStatus(traceId, {projectKey: projectId})

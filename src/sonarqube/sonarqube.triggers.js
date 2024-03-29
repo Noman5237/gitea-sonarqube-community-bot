@@ -76,3 +76,57 @@ export const deleteSonarqubeProject = async (req) => {
   await scmServices.deleteRepo(req.traceId, repository)
   await sonarqubeService.deleteProject(req.traceId, projectKey)
 }
+
+export const createSonarqubeReportOnPush = async (req) => {
+  const repository = req.body.repository
+  const branch = req.body.ref.split('/').pop()
+  if (branch !== repository.default_branch) {
+    return
+  }
+  const projectKey = `${repository.full_name}-${branch}`.replace('/', '_')
+  repository.projectKey = projectKey
+  log(req.traceId, `Creating Sonarqube report ${projectKey}`)
+
+  try {
+    // add status to commit
+    await giteaService.addStatusToCommit(req.traceId, {
+      repository,
+      sha: req.body.pull_request.head.sha,
+      state: 'pending',
+      description: `Sonarqube report is being created, trace: ${req.traceId}`,
+      context: 'Sonarqube'
+    })
+
+    await sonarqubeService.createProject(req)
+    await scmServices.cloneRepo(req.traceId, repository, branch)
+    await scmServices.checkoutBranch(req.traceId, repository, branch)
+    await scmServices.pullBranch(req.traceId, repository, branch)
+    await sonarqubeService.runAnalysis(req.traceId, repository, branch, req.body.after.substring(0, 7))
+
+    const report = await sonarqubeService.generateReportSummary(req.traceId, repository, branch)
+
+    // add status to commit
+    await giteaService.addStatusToCommit(req.traceId, {
+      repository,
+      sha: req.body.pull_request.head.sha,
+      state: report.status,
+      description: `Sonarqube report is created! trace: ${req.traceId}`,
+      context: 'Sonarqube',
+      target_url: `${GLOBALS.SONARQUBE_URL}/dashboard?id=${projectKey}`
+    })
+
+    await scmServices.deleteRepo(req.traceId, repository)
+  } catch (e) {
+    log(req.traceId, e.message);
+    // add status to commit
+    await giteaService.addStatusToCommit(req.traceId, {
+      repository,
+      sha: req.body.pull_request.head.sha,
+      state: 'failure',
+      description: `Internal Service Exception! trace: ${req.traceId}`,
+      context: 'Sonarqube',
+      target_url: `${GLOBALS.SONARQUBE_URL}/dashboard?id=${projectKey}`
+    })
+    throw 'failed to create sonarqube report'
+  }
+}
