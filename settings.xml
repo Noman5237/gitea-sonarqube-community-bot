@@ -1,5 +1,7 @@
-<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
+<settings
+        xmlns="http://maven.apache.org/SETTINGS/1.2.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 https://maven.apache.org/xsd/settings-1.2.0.xsd">
     <localRepository/>
     <interactiveMode/>
     <offline/>
@@ -8,23 +10,10 @@
         <server>
             <id>artifactory-fintech-dev</id>
             <username>admin</username>
-            <password>password</password>
-        </server>
-        <server>
-            <id>artifactory-fintech-dev-mirror</id>
-            <username>admin</username>
-            <password>password</password>
+            <password>Fintech@bs23</password>
         </server>
     </servers>
-    <mirrors>
-        <mirror>
-            <id>artifactory-fintech-dev-mirror</id>
-            <mirrorOf>artifactory-fintech-dev</mirrorOf>
-            <name>Pseudo repository to mirror external repositories initially using HTTP.</name>
-            <url>http://172.16.231.10:8081/artifactory/fintech-dev</url>
-            <blocked>false</blocked>
-        </mirror>
-    </mirrors>
+    <mirrors></mirrors>
     <proxies/>
     <profiles/>
     <activeProfiles/>
